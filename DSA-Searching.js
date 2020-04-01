@@ -1,3 +1,37 @@
+
+function binarySearch(array, value, start, end) {
+  var start = start === undefined ? 0 : start;
+  var end = end === undefined ? array.length : end;
+
+  if (start > end) {
+    return -1;
+  }
+
+  const index = Math.floor((start + end) / 2);
+  const item = array[index];
+
+  console.log(start, end);
+  if (item == value) {
+    return index;
+  }
+  else if (item < value) {
+    return binarySearch(array, value, index + 1, end);
+  }
+  else if (item > value) {
+    return binarySearch(array, value, start, index - 1);
+  }
+};
+
+const array1 = [3, 5, 6, 8, 11, 12, 14, 15, 17, 18];
+
+//console.log(binarySearch(array1, 8));
+// should output: 0, 10, test 12, 0, 4, test 6, 3, 4, test 8, return index 3
+//console.log(binarySearch(array1, 16));
+// should output 0, 10, (12), 6, 10, (17), 6, 7 (14), 7, 7 (15), return -1
+
+
+/*******************************************************/
+
 class BinarySearchTree {
   constructor(key = null, value = null, parent = null) {
     this.key = key;
@@ -7,32 +41,6 @@ class BinarySearchTree {
     this.right = null;
   }
 
-  insert(key, value) {
-    //root node
-    if (this.key === null) {
-      this.key = key;
-      this.value = value;
-    }
-
-    //left side
-    else if (key < this.key) {
-      if (this.left) {
-        this.left.insert(key, value);
-      }
-      else {
-        this.left = new BinarySearchTree(key, value, this);
-      }
-    }
-
-    //right side
-    else if (key > this.key) {
-      if (this.right) {
-        this.right.insert(key, value);
-      } else {
-        this.right = new BinarySearchTree(key, value, this);
-      }
-    }
-  }
 
   insert(key, value) {
     // if the tree is empty, then insert at that node 
@@ -94,7 +102,6 @@ class BinarySearchTree {
       throw new Error('Key error')
     }
   }
-
 
   remove(key) {
     if (this.key === key) {
@@ -171,72 +178,127 @@ class BinarySearchTree {
     }
     this.left._findMin();
   }
-}
 
-const tree = new BinarySearchTree();
-tree.insert(3);
-tree.insert(1);
-tree.insert(4);
-tree.insert(6);
-tree.insert(9);
-tree.insert(2);
-tree.insert(5);
-tree.insert(7);
-
-const treeStr = new BinarySearchTree();
-treeStr.insert('E');
-treeStr.insert('A');
-treeStr.insert('S');
-treeStr.insert('Y');
-treeStr.insert('Q');
-treeStr.insert('U');
-treeStr.insert('E');
-treeStr.insert('S');
-treeStr.insert('T');
-treeStr.insert('I');
-treeStr.insert('O');
-treeStr.insert('N');
-
-const test = new BinarySearchTree();
-test.insert(4);
-test.insert(2);
-test.insert(3);
-test.insert(1);
-
-
-/**** Need to revisit ****/
-function height(tree, level) {
-  //if tree is empty, return 0
-  if (tree === null) {
-    return 0;
-  }
-
-  if(!tree.right && !tree.left){
-    return level;
-  }
-
-  if(tree.right && tree.left){
-    return Math.max(height(tree.right, level+1), height(tree.left, level+1));
-  } else if (!tree.right){
-    return height(tree.left, level+1);
-  } else return height(tree.right, level+1);
-  
-}
-
-console.log(height(test, 1));
-
-
-/*
-What does the program do
-function tree(t){
-    if(!t){
-        return 0;
+  dfs(values = []) {
+    if (this.left) {
+      values = this.left.dfs(values);
     }
-    return tree(t.left) + t.value + tree(t.right)
-}
-This program recursively goes through the tree and sums the entire tree.
-Best case is O(1) given an empty tree
-Average and worse case are O(n) as it needs to go through the entire tree.
-*/
+    values.push(this.value);
 
-module.exports = BinarySearchTree;
+    if (this.right) {
+      values = this.right.dfs(values);
+    }
+    return values;
+  }
+
+  bfs(tree, values = []) {
+    const queue = new Queue(); // Assuming a Queue is implemented (refer to previous lesson on Queue)
+    const node = tree.root;
+    queue.enqueue(node);
+    while (queue.length) {
+      const node = queue.dequeue(); //remove from the queue
+      values.push(node.value); // add that value from the queue to an array
+
+      if (node.left) {
+        queue.enqueue(node.left); //add left child to the queue
+      }
+
+      if (node.right) {
+        queue.enqueue(node.right); // add right child to the queue
+      }
+    }
+
+    return values;
+  }
+}
+
+function inOrder(tree, values = []) {
+  if (tree.left) {
+    values = inOrder(tree.left, values);
+  }
+  values.push(tree.key);
+
+  if (tree.right) {
+    values = inOrder(tree.right, values);
+  }
+  return values;
+}
+
+function preOrder(tree, values = []) {
+  //node first
+  values.push(tree.key);
+
+  //then left branch if exists
+  if (tree.left) {
+    values = preOrder(tree.left, values);
+  }
+
+  //then right branch if exists
+  if (tree.right) {
+    values = preOrder(tree.right, values);
+  }
+
+  return values;
+}
+
+function postOrder(tree, values = []) {
+  //first left branch if exists
+  if (tree.left) {
+    values = postOrder(tree.left, values);
+  }
+
+  //then right branch if exists
+  if (tree.right) {
+    values = postOrder(tree.right, values);
+  }
+
+  values.push(tree.key);
+
+  //lastly node
+  return values;
+}
+
+const bst = new BinarySearchTree();
+
+bst.insert(25);
+bst.insert(15);
+bst.insert(50);
+bst.insert(10);
+bst.insert(24);
+bst.insert(35);
+bst.insert(70);
+bst.insert(4);
+bst.insert(12);
+bst.insert(18);
+bst.insert(31);
+bst.insert(44);
+bst.insert(66);
+bst.insert(90);
+bst.insert(22);
+
+console.log(inOrder(bst));
+console.log(preOrder(bst));
+console.log(postOrder(bst));
+
+
+const sharePrice = [128, 97, 121, 123, 98, 97, 105, 150, 300];
+
+function maxProfit(price) {
+  let profit = 0;
+
+  for (i = 0; i < price.length; i++) {
+    //if there's no record of the next day's share price, return current profit
+    if (!price[i + 1]) {
+      return profit;
+    }
+    if (price[i + 1] - price[i] > profit) {
+      profit = price[i + 1] - price[i]
+    }
+  }
+}
+
+console.log(maxProfit(sharePrice));
+
+const findBook(dewey, title){
+
+}
